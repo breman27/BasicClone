@@ -1,0 +1,31 @@
+expr        : KEYWORD:VAR IDENTIFIER EQ expr
+            : comp_expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
+
+comp-expr   : NOT comp-expr
+            : arith-expr ((GT|LT|EE|GTE|LTE) arith-expr)*
+
+arith-expr  : term ((PLUS|MINUS) term)*
+
+term        : factor ((MUL|DIV) factor)*
+
+factor      : (PLUS|MINUS) factor
+            : power
+
+power       : atom ((POWER) factor)*
+
+atom        : INT|FLOAT|IDENTIFIER
+            : LPAREN expr RPAREN
+            : if-expr
+            : for-expr
+            : while-expr
+
+if-expr     : KEYWORD:IF condition KEYWORD:THEN expr
+            : (KEYWORD:ELIF condition KEYWORD THEN expr)*
+            : (KEYWORD: ELSE expr)?
+
+for-expr    : KEYWORD:FOR IDENTIFIER EQ expr KEYWORD:TO expr
+            : (KEYWORD: STEP expr)? KEYWORD:THEN expr
+
+while-expr  : KEYWORD:WHILE expr KEYWORD:THEN expr
+
+
