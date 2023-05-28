@@ -77,6 +77,11 @@ class Parser:
             self.advance()
             return res.success(nodes.NumberNode(tok))
 
+        elif tok.type == basic_token.TT_STRING:
+            res.register_advance()
+            self.advance()
+            return res.success(nodes.StringNode(tok))
+
         elif tok.type in basic_token.TT_IDENTIFIER:
             res.register_advance()
             self.advance()

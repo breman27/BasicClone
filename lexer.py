@@ -103,6 +103,31 @@ class Lexer:
         self.advance()
         return None, errors.ExpectedCharError(start_pos, self.pos, "Expected an '=' after '!'")
 
+    def make_string(self):
+        start_pos = self.pos.copy()
+        string = ''
+        escape_char = False
+        self.advance()
+
+        escape_chars = {
+            'n': '\n',
+            't': '\t'
+        }
+
+        while self.current_char is not None and (self.current_char != '"' or escape_char):
+            if escape_char:
+                string += escape_chars.get(self.current_char, self.current_char)
+                escape_char = False
+            else:
+                if self.current_char == '\\':
+                    escape_char = True
+                else:
+                    string += self.current_char
+            self.advance()
+
+        self.advance()
+        return basic_token.Token(basic_token.TT_STRING, string, start_pos, self.pos)
+
     def make_tokens(self):
         tokens = []
 
@@ -113,6 +138,8 @@ class Lexer:
                 tokens.append(self.make_number())
             elif self.current_char in constants.LETTERS:
                 tokens.append(self.make_identifier())
+            elif self.current_char == '"':
+                tokens.append(self.make_string())
             elif self.current_char == '+':
                 tokens.append(basic_token.Token(basic_token.TT_PLUS, start_pos=self.pos))
                 self.advance()

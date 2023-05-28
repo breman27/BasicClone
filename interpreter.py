@@ -4,6 +4,7 @@
 import basic_number
 import basic_token
 from basic_number import Number
+from basic_string import String
 from errors import RTError
 from function import Function
 from runtime_result import RTResult
@@ -21,6 +22,11 @@ class Interpreter:
 
     def visit_NumberNode(self, node, context):
         return RTResult().success(Number(node.token.value)
+                                  .set_context(context)
+                                  .set_position(node.token.start_pos, node.token.end_pos))
+
+    def visit_StringNode(self, node, context):
+        return RTResult().success(String(node.token.value)
                                   .set_context(context)
                                   .set_position(node.token.start_pos, node.token.end_pos))
 
