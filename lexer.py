@@ -84,6 +84,15 @@ class Lexer:
 
         return basic_token.Token(tok_type, start_pos=start_pos, end_pos=self.pos)
 
+    def make_minus_or_arrow(self):
+        start_pos = self.pos.copy()
+        tok_type = basic_token.TT_MINUS
+        self.advance()
+        if self.current_char == '>':
+            self.advance()
+            tok_type = basic_token.TT_ARROW
+        return basic_token.Token(tok_type, start_pos=start_pos, end_pos=self.pos)
+
     def make_not_equals(self):
         start_pos = self.pos.copy()
         self.advance()
@@ -108,8 +117,7 @@ class Lexer:
                 tokens.append(basic_token.Token(basic_token.TT_PLUS, start_pos=self.pos))
                 self.advance()
             elif self.current_char == '-':
-                tokens.append(basic_token.Token(basic_token.TT_MINUS, start_pos=self.pos))
-                self.advance()
+                tokens.append(self.make_minus_or_arrow())
             elif self.current_char == '*':
                 tokens.append(basic_token.Token(basic_token.TT_MUL, start_pos=self.pos))
                 self.advance()
@@ -136,6 +144,9 @@ class Lexer:
                 tokens.append(self.make_less_than())
             elif self.current_char == '>':
                 tokens.append(self.make_greater_than())
+            elif self.current_char == ',':
+                tokens.append(basic_token.Token(basic_token.TT_COMMA, start_pos=self.pos))
+                self.advance()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char

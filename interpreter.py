@@ -5,6 +5,7 @@ import basic_number
 import basic_token
 from basic_number import Number
 from errors import RTError
+from function import Function
 from runtime_result import RTResult
 
 
@@ -176,3 +177,37 @@ class Interpreter:
                 return res
 
         return res.success(None)
+
+    def visit_FuncDefNode(self, node, context):
+        res = RTResult()
+
+        func_name = node.var_name_tok.value if node.var_name_tok else None
+        body_node = node.body_node
+        arg_names = [arg_name.value for arg_name in node.arg_name_toks]
+
+        func_value = Function(func_name, body_node, arg_names).set_context(context)\
+            .set_position(node.start_pos, node.end_pos)
+
+        if node.var_name_tok:
+            context.symbol_table.set(func_name, func_value)
+
+        return res.success(func_value)
+
+    def visit_CallNode(self, node, context):
+        res = RTResult()
+        args = []
+
+        value_to_call = res.register(self.visit(node.node_to_call, context))
+        if res.error:
+            return res
+        value_to_call = value_to_call.copy().set_position(node.start_pos, node.end_pos)
+
+        for arg_node in node.arg_nodes:
+            args.append(res.register(self.visit(arg_node, context)))
+            if res.error:
+                return res
+
+        return_value = res.register(value_to_call.execute(args))
+        if res.error:
+            return res
+        return res.success(return_value)

@@ -20,6 +20,8 @@ TT_LT = 'LT'
 TT_GT = 'GT'
 TT_LTE = 'LTE'
 TT_GTE = 'GTE'
+TT_COMMA = 'COMMA'
+TT_ARROW = 'ARROW'
 TT_EOF = 'EOF'
 
 KEYWORDS = [
@@ -34,7 +36,8 @@ KEYWORDS = [
     'FOR',
     'TO',
     'WHILE',
-    'STEP'
+    'STEP',
+    'FUN'
 ]
 
 class Token:

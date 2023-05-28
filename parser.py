@@ -28,6 +28,46 @@ class Parser:
 
         return self.current_token
 
+    def call(self):
+        res = ParseResult()
+        atom = res.register(self.atom())
+        if res.error:
+            return res
+
+        if self.current_token.type == basic_token.TT_LPAREN:
+            res.register_advance()
+            self.advance()
+            arg_nodes = []
+
+            if self.current_token.type == basic_token.TT_RPAREN:
+                res.register_advance()
+                self.advance()
+
+            else:
+                arg_nodes.append(res.register(self.expression()))
+                if res.error:
+                    return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                          self.current_token.end_pos,
+                                                          "Expected Int, Float, identifier, '+', '-', 'VAR', '(', or ')'"))
+
+            while self.current_token.type == basic_token.TT_COMMA:
+                res.register_advance()
+                self.advance()
+
+                arg_nodes.append(res.register(self.expression()))
+                if res.error:
+                    return res
+
+            if self.current_token.type != basic_token.TT_RPAREN:
+                return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                      self.current_token.end_pos,
+                                                      "Expected ',' or ')'"))
+            res.register_advance()
+            self.advance()
+
+            return res.success(nodes.CallNode(atom, arg_nodes))
+        return res.success(atom)
+
     def atom(self):
         res = ParseResult()
         tok = self.current_token
@@ -74,11 +114,17 @@ class Parser:
                 return res
             return res.success(while_expr)
 
+        elif tok.matches(basic_token.TT_KEYWORD, 'FUN'):
+            func_def = res.register(self.func_def())
+            if res.error:
+                return res
+            return res.success(func_def)
+
         return res.failure(InvalidSyntaxError(tok.start_pos, tok.end_pos, "Expected Int, Float, identifier, "
                                                                           "'+', '-', or '('"))
 
     def power(self):
-        return self.bin_operation(self.atom, (basic_token.TT_POWER, ), self.factor)
+        return self.bin_operation(self.call, (basic_token.TT_POWER, ), self.factor)
 
     def for_expr(self):
         res = ParseResult()
@@ -169,6 +215,55 @@ class Parser:
             return res
 
         return res.success(nodes.WhileNode(condition, body))
+
+    def func_def(self):
+        res = ParseResult()
+        func_name = None
+        args = []
+
+        res.register_advance()
+        self.advance()
+
+        if self.current_token.type == basic_token.TT_IDENTIFIER:
+            func_name = self.current_token
+            res.register_advance()
+            self.advance()
+
+        if self.current_token.type != basic_token.TT_LPAREN:
+            return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                  self.current_token.end_pos, "Expected '('"))
+
+        res.register_advance()
+        self.advance()
+
+        while self.current_token.type == basic_token.TT_IDENTIFIER or self.current_token.type == basic_token.TT_COMMA:
+            if self.current_token.type == basic_token.TT_IDENTIFIER:
+                args.append(self.current_token)
+                res.register_advance()
+                self.advance()
+            elif self.current_token.type == basic_token.TT_COMMA:
+                res.register_advance()
+                self.advance()
+
+        if self.current_token.type != basic_token.TT_RPAREN:
+            return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                  self.current_token.end_pos, "Expected ')'"))
+
+        res.register_advance()
+        self.advance()
+
+        if self.current_token.type != basic_token.TT_ARROW:
+            return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                  self.current_token.end_pos, "Expected '->'"))
+
+        res.register_advance()
+        self.advance()
+
+        node_to_return = res.register(self.expression())
+
+        if res.error:
+            return res
+        return res.success(nodes.FuncDefNode(func_name, args, node_to_return))
 
     def if_expr(self):
         res = ParseResult()
