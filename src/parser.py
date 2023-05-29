@@ -1,9 +1,9 @@
 ##################
 # PARSER
 ##################
-import basic_token
+from src import basic_token
 import nodes
-from errors import InvalidSyntaxError
+from src.errors import InvalidSyntaxError
 from parse_result import ParseResult
 
 
@@ -75,8 +75,8 @@ class Parser:
             return res.success(nodes.UnaryOpNode(op_tok, node))
 
         node = res.register(self.bin_operation(self.arith_expr, (basic_token.TT_EE, basic_token.TT_NE,
-                                                                   basic_token.TT_LT, basic_token.TT_GT,
-                                                                   basic_token.TT_GTE, basic_token.TT_LTE)))
+                                                                 basic_token.TT_LT, basic_token.TT_GT,
+                                                                 basic_token.TT_GTE, basic_token.TT_LTE)))
         if res.error:
             return res.failure(InvalidSyntaxError(self.current_token.start_pos,
                                self.current_token.end_pos, "Expected Int, Float, identifier, '+', '-', 'NOT', or '('"))
@@ -103,7 +103,7 @@ class Parser:
         return self.power()
 
     def power(self):
-        return self.bin_operation(self.call, (basic_token.TT_POWER, ), self.factor)
+        return self.bin_operation(self.call, (basic_token.TT_POWER,), self.factor)
 
     def call(self):
         res = ParseResult()

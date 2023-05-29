@@ -1,7 +1,7 @@
 ##################
 # VALUE
 ##################
-import errors
+from src import errors
 
 
 class Value:

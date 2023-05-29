@@ -1,7 +1,6 @@
 ##################
 # INTERPRETER
 ##################
-import basic_number
 import basic_token
 from basic_number import Number
 from basic_string import String
