@@ -6,6 +6,10 @@ import errors
 
 class Value:
     def __init__(self):
+        self.start_pos = None
+        self.end_pos = None
+        self.context = None
+
         self.set_position()
         self.set_context()
 

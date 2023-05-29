@@ -12,12 +12,6 @@ class Number(Value):
         super().__init__()
         self.value = value
 
-    def set_position(self, start_pos=None, end_pos=None):
-        self.start_pos = start_pos
-        self.end_pos = end_pos
-
-        return self
-
     def added_to(self, other):
         if isinstance(other, Number):
             return Number(self.value + other.value).set_context(self.context), None
@@ -110,10 +104,6 @@ class Number(Value):
         copy.set_position(self.start_pos, self.end_pos)
         copy.set_context(self.context)
         return copy
-
-    def set_context(self, context=None):
-        self.context = context
-        return self
 
     def __repr__(self):
         return str(self.value)
