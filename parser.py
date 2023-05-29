@@ -178,6 +178,12 @@ class Parser:
                 return res.failure(InvalidSyntaxError(self.current_token.start_pos, self.current_token.end_pos,
                                                       "Expected ')'"))
 
+        elif tok.type == basic_token.TT_LBRACKET:
+            list_expr = res.register(self.list_expr())
+            if res.error:
+                return res
+            return res.success(list_expr)
+
         elif tok.matches(basic_token.TT_KEYWORD, 'IF'):
             if_expr = res.register(self.if_expr())
             if res.error:
@@ -350,6 +356,48 @@ class Parser:
             return res
 
         return res.success(nodes.WhileNode(condition, body))
+
+    def list_expr(self):
+        res = ParseResult()
+        elements = []
+        start_pos = self.current_token.start_pos.copy()
+
+        if self.current_token.type != basic_token.TT_LBRACKET:
+            return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                  self.current_token.end_pos,
+                                                  "Expected '['"))
+
+        res.register_advance()
+        self.advance()
+
+        if self.current_token.type == basic_token.TT_RBRACKET:
+            res.register_advance()
+            self.advance()
+
+        else:
+            elements.append(res.register(self.expression()))
+            if res.error:
+                return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                      self.current_token.end_pos,
+                                                      "Expected ',' or ']'"))
+
+            while self.current_token.type == basic_token.TT_COMMA:
+                res.register_advance()
+                self.advance()
+
+                elements.append(res.register(self.expression()))
+                if res.error:
+                    return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                          self.current_token.end_pos,
+                                                          "Expected ','"))
+
+            if self.current_token.type != basic_token.TT_RBRACKET:
+                return res.failure(InvalidSyntaxError(self.current_token.start_pos,
+                                                      self.current_token.end_pos,
+                                                      "Expected ']'"))
+            res.register_advance()
+            self.advance()
+        return res.success(nodes.ListNode(elements, start_pos, self.current_token.end_pos.copy()))
 
     def func_def(self):
         res = ParseResult()

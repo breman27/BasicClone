@@ -157,6 +157,12 @@ class Lexer:
             elif self.current_char == ')':
                 tokens.append(basic_token.Token(basic_token.TT_RPAREN, start_pos=self.pos))
                 self.advance()
+            elif self.current_char == '[':
+                tokens.append(basic_token.Token(basic_token.TT_LBRACKET, start_pos=self.pos))
+                self.advance()
+            elif self.current_char == ']':
+                tokens.append(basic_token.Token(basic_token.TT_RBRACKET, start_pos=self.pos))
+                self.advance()
             elif self.current_char == '^':
                 tokens.append(basic_token.Token(basic_token.TT_POWER, start_pos=self.pos))
                 self.advance()

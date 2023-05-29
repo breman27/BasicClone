@@ -31,6 +31,8 @@ for-expr    : KEYWORD:FOR IDENTIFIER EQ expr KEYWORD:TO expr
 
 while-expr  : KEYWORD:WHILE expr KEYWORD:THEN expr
 
+list-expr   : LBRACKET (expr (COMMA expr)*)? RBRACKET
+
 func-def    : KEYWORD:FUN IDENTIFIER?
               LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
               ARROW expr
